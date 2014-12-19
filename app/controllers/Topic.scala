@@ -36,8 +36,18 @@ import com.twitter.zk.{ZNode, ZkClient}
 import scala.util.Random
 import okapies.finagle.Kafka
 import kafka.api.OffsetRequest
+import play.api.data.{Form, Forms}
+import play.api.data.Forms._
+import play.api.Logger
 
 object Topic extends Controller {
+  
+  val topicForm = Forms.tuple(
+    "name" -> Forms.text,
+    "numPartitions" -> Forms.number,
+    "replicationFactor" -> Forms.number
+  )
+
 
   object TopicsWrites extends Writes[Seq[Map[String, Object]]] {
     def writes(l: Seq[Map[String, Object]]) = {
@@ -95,6 +105,27 @@ object Topic extends Controller {
     Future.sequence(topicsZks).map(l => Ok(Json.toJson(l.flatten)(TopicsWrites)))
   }
 
+  def create() = Action { implicit request =>
+    val result = Form(topicForm).bindFromRequest.fold(
+      formFailure => BadRequest,
+      formSuccess => {
+
+        val name: String = formSuccess._1
+        val numPartitions: Int = formSuccess._2
+        val replicationFactor: Int = formSuccess._3
+        
+        Logger.info("topic " + name + ", " + numPartitions + ", " + replicationFactor)
+
+        //val topic = models.Zookeeper.insert(models.Zookeeper(name, host, port, models.Group.findByName(group.toUpperCase).get.id, models.Status.Disconnected.id, chroot))
+
+        //Akka.system.actorSelection("akka://application/user/router") ! Message.Connect(zk)
+        Created
+      }
+    )
+
+    result
+  }
+  
   def show(topic: String, zookeeper: String) = Action.async {
     val connectedZks = connectedZookeepers((z, c) => (z, c)).filter(_._1.name == zookeeper)
 

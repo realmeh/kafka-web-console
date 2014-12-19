@@ -1,33 +1,83 @@
-<div class="table-responsive">
-    <table class="table table-hover">
-        <thead>
-        <th class="text-center"></th>
-        <th class="text-center">Zookeeper</th>
-        <th class="text-center">Topic</th>
-        <th class="text-center">Partition</th>
-        <th class="text-center">Log Size</th>
-        <th class="text-center">Leader</th>
-        </thead>
-        <tbody data-ng-repeat="topic in topics">
-        <tr>
-            <td>
-                <i class="fa fa-minus-square fa-lg" data-ng-if="topic.expanded" data-ng-click="topic.expanded = false"/>
-                <i class="fa fa-plus-square fa-lg" data-ng-if="!topic.expanded" data-ng-click="topic.expanded = true"/>
-            </td>
-            <td class="clickable text-center" data-ng-click="getTopic(topic);">{{topic.zookeeper}}</td>
-            <td class="clickable text-center" data-ng-click="getTopic(topic);">{{topic.name}}</td>
-            <td class="clickable text-center" data-ng-click="getTopic(topic);">-</td>
-            <td class="clickable text-center" data-ng-click="getTopic(topic);">{{topic.logSize}}</td>
-            <td class="clickable text-center" data-ng-click="getTopic(topic);">-</td>
-        </tr>
-        <tr data-ng-if="topic.expanded" class="row-animation" data-ng-repeat="partition in topic.partitions track by $index">
-            <td class="text-center"></td>
-            <td class="text-center"></td>
-            <td class="text-center"></td>
-            <td class="text-center">{{$index}}</td>
-            <td class="text-center">{{partition.logSize}}</td>
-            <td class="text-center">{{partition.leader}}</td>
-        </tr>
-        </tbody>
-    </table>
+<ul class="nav nav-tabs">
+    <li class="active">
+        <a data-toggle="tab" data-target="#all-zookeepers">All</a>
+    </li>
+    <li>
+        <a data-toggle="tab" data-target="#create-topic">Create Topic</a>
+    </li>
+</ul>
+
+<div class="tab-content">
+    <div class="tab-pane active" id="all-topics">  
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <th class="text-center"></th>
+                    <th class="text-center">Zookeeper</th>
+                    <th class="text-center">Topic</th>
+                    <th class="text-center">Partition</th>
+                    <th class="text-center">Log Size</th>
+                    <th class="text-center">Leader</th>
+                </thead>
+                <tbody data-ng-repeat="topic in topics">
+                <tr>
+                    <td>
+                        <i class="fa fa-minus-square fa-lg" data-ng-if="topic.expanded" data-ng-click="topic.expanded = false"/>
+                        <i class="fa fa-plus-square fa-lg" data-ng-if="!topic.expanded" data-ng-click="topic.expanded = true"/>
+                    </td>
+                    <td class="clickable text-center" data-ng-click="getTopic(topic);">{{topic.zookeeper}}</td>
+                    <td class="clickable text-center" data-ng-click="getTopic(topic);">{{topic.name}}</td>
+                    <td class="clickable text-center" data-ng-click="getTopic(topic);">-</td>
+                    <td class="clickable text-center" data-ng-click="getTopic(topic);">{{topic.logSize}}</td>
+                    <td class="clickable text-center" data-ng-click="getTopic(topic);">-</td>
+                </tr>
+                <tr data-ng-if="topic.expanded" class="row-animation" data-ng-repeat="partition in topic.partitions track by $index">
+                    <td class="text-center"></td>
+                    <td class="text-center"></td>
+                    <td class="text-center"></td>
+                    <td class="text-center">{{$index}}</td>
+                    <td class="text-center">{{partition.logSize}}</td>
+                    <td class="text-center">{{partition.leader}}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="tab-pane" id="create-topic">  
+        <form role="form" name="topicForm" data-ng-submit="createTopic(topic)"
+              novalidate>
+            <div class="form-group"
+                 data-ng-class="{ 'has-error' : topicForm.name.$invalid && !topicForm.name.$pristine }">
+                <label for="name">Topic Name</label>
+                <input data-ng-required="true" type="text" id="name" name="name" data-ng-model="topic.name"
+                       class="form-control" data-placement="bottom" title="Unique name to identify topic"
+                       data-toggle="tooltip">
+
+                <p data-ng-show="topicForm.name.$invalid && !topicForm.name.$pristine" class="help-block">A name
+                    for the topic is required.</p>
+            </div>
+            <div class="form-group"
+                 data-ng-class="{ 'has-error' : topicForm.numPartitions.$invalid && !topicForm.numPartitions.$pristine }">
+                <label for="numPartitions">Number Of Partitions</label>
+                <input type="number" id="numPartitions" name="numPartitions" data-ng-model="topic.numPartitions"
+                       data-ng-required="true" class="form-control" min="0" max="65535">
+
+                <p data-ng-show="topicForm.numPartitions.$invalid && !topicForm.numPartitions.$pristine" class="help-block">Number of Partitions
+                  are invalid.</p>
+            </div>
+            <div class="form-group"
+                 data-ng-class="{ 'has-error' : topicForm.replicationFactor.$invalid && !topicForm.replicationFactor.$pristine }">
+                <label for="replicationFactor">Replication Factor</label>
+                <input type="number" id="replicationFactor" name="replicationFactor" data-ng-model="topic.replicationFactor"
+                       data-ng-required="true" class="form-control" min="0" max="65535">
+
+                <p data-ng-show="topicForm.replicationFactor.$invalid && !topicForm.replicationFactor.$pristine" class="help-block">Replication Factor
+                  is invalid.</p>
+            </div>
+            <p class="text-center">
+                <button class="btn btn-large btn-primary" data-ng-disabled="topicForm.$invalid">Add Topic</button>
+            </p>
+        </form>
+    </div>
 </div>
+

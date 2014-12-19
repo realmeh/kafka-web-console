@@ -31,4 +31,11 @@ app.controller("TopicsController", function ($scope, $location, $http, $filter) 
     $scope.getTopic = function (topic) {
         $location.path('topics/' + topic.name + '/' + topic.zookeeper);
     };
+    
+    $scope.createTopic = function (topic) {
+        $http.put('topics.json', { name: topic.name, numPartitions: topic.numPartitions, replicationFactor: topic.replicationFactor }).success(function () {
+            $location.path("/");
+        });
+    };
+
 });
