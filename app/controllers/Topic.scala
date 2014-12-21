@@ -40,6 +40,7 @@ import play.api.data.{Form, Forms}
 import play.api.data.Forms._
 import play.api.Logger
 import kafka.admin.AdminUtils
+import kafka.utils.ZKStringSerializer
 
 object Topic extends Controller {
   
@@ -117,14 +118,15 @@ object Topic extends Controller {
         val replicationFactor: Int = formSuccess._3
         val zookeeperCluster: String = formSuccess._4
         
-        Logger.info("topic " + topicName + ", " + numPartitions + ", " + replicationFactor)
+        Logger.info("topic " + topicName + ", " + numPartitions + ", " + replicationFactor + ", " + zookeeperCluster)
 
-        val firstZk = connectedZookeepers((z, c) => (z, c))(0)._1
-        Logger.info("connectedZks " + firstZk.name)
-        Logger.info("connectedZks " + firstZk.host)
+        val zks = connectedZookeepers((z, c) => (z, c)).filter(_._1.name == zookeeperCluster)
+        val namedZk = zks(0)._1
+        Logger.info("zk = " + namedZk.name)
+        Logger.info("zk = " + namedZk.host)
 
         // TODO:  Look at using two different ZK clients (Kafka uses IOtec, this webapp uses Twitter)
-        val client = new org.I0Itec.zkclient.ZkClient(firstZk.host)
+        val client = new org.I0Itec.zkclient.ZkClient(namedZk.host, 30000, 30000, ZKStringSerializer)
         Logger.info("client " + client)
 
         try {
