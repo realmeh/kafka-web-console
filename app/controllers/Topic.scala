@@ -39,13 +39,15 @@ import kafka.api.OffsetRequest
 import play.api.data.{Form, Forms}
 import play.api.data.Forms._
 import play.api.Logger
+import kafka.admin.AdminUtils
 
 object Topic extends Controller {
   
   val topicForm = Forms.tuple(
     "name" -> Forms.text,
     "numPartitions" -> Forms.number,
-    "replicationFactor" -> Forms.number
+    "replicationFactor" -> Forms.number,
+    "zooKeeperCluster" -> Forms.text
   )
 
 
@@ -110,15 +112,28 @@ object Topic extends Controller {
       formFailure => BadRequest,
       formSuccess => {
 
-        val name: String = formSuccess._1
+        val topicName: String = formSuccess._1
         val numPartitions: Int = formSuccess._2
         val replicationFactor: Int = formSuccess._3
+        val zookeeperCluster: String = formSuccess._4
         
-        Logger.info("topic " + name + ", " + numPartitions + ", " + replicationFactor)
+        Logger.info("topic " + topicName + ", " + numPartitions + ", " + replicationFactor)
 
-        //val topic = models.Zookeeper.insert(models.Zookeeper(name, host, port, models.Group.findByName(group.toUpperCase).get.id, models.Status.Disconnected.id, chroot))
+        val firstZk = connectedZookeepers((z, c) => (z, c))(0)._1
+        Logger.info("connectedZks " + firstZk.name)
+        Logger.info("connectedZks " + firstZk.host)
 
-        //Akka.system.actorSelection("akka://application/user/router") ! Message.Connect(zk)
+        // TODO:  Look at using two different ZK clients (Kafka uses IOtec, this webapp uses Twitter)
+        val client = new org.I0Itec.zkclient.ZkClient(firstZk.host)
+        Logger.info("client " + client)
+
+        try {
+          AdminUtils.createTopic(client, topicName, numPartitions, replicationFactor)
+        }
+        finally {
+          client.close()
+        }
+
         Created
       }
     )

@@ -3,7 +3,7 @@
         <a data-toggle="tab" data-target="#all-zookeepers">All</a>
     </li>
     <li>
-        <a data-toggle="tab" data-target="#create-topic">Create Topic</a>
+        <a data-toggle="tab" data-target="#create-topic" data-ng-click="getZookeepers('all')">Create Topic</a>
     </li>
 </ul>
 
@@ -73,6 +73,15 @@
 
                 <p data-ng-show="topicForm.replicationFactor.$invalid && !topicForm.replicationFactor.$pristine" class="help-block">Replication Factor
                   is invalid.</p>
+            </div>
+            <div class="form-group"
+                 data-ng-class="{ 'has-error' : topicForm.zooKeeperCluster.$invalid && !topicForm.zooKeeperCluster.$pristine }">
+                <label for="zooKeeperCluster">ZooKeeper Cluster</label>
+                <select id="zooKeeperCluster" name="zooKeeperCluster" data-ng-model="topic.zooKeeperCluster" data-ng-required="true"
+                  ng-options="zookeeper.name for zookeeper in allZookeepers" data-ng-required="true" class="form-control">
+                </select>
+                <p data-ng-show="topicForm.zooKeeperCluster.$invalid && !topicForm.zooKeeperCluster.$pristine" class="help-block">ZooKeeper
+                Cluster in invalid</p>
             </div>
             <p class="text-center">
                 <button class="btn btn-large btn-primary" data-ng-disabled="topicForm.$invalid">Add Topic</button>

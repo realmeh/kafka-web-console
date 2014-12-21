@@ -33,9 +33,23 @@ app.controller("TopicsController", function ($scope, $location, $http, $filter) 
     };
     
     $scope.createTopic = function (topic) {
-        $http.put('topics.json', { name: topic.name, numPartitions: topic.numPartitions, replicationFactor: topic.replicationFactor }).success(function () {
+        $http.put('topics.json', { name: topic.name, numPartitions: topic.numPartitions, replicationFactor: topic.replicationFactor, zooKeeperCluster: topic.zooKeeperCluster.name }).success(function () {
             $location.path("/");
         });
+    };
+
+    $scope.getZookeepers = function (group) {
+        $http.get('zookeepers.json/' + group).
+            success(function (data) {
+                var zkNames = [];
+                angular.forEach(data, function(zk) {
+                    var selectOption = {};
+                    selectOption['name'] = zk.name;
+                    this.push(selectOption);
+                }, zkNames);
+                $scope.allZookeepers = zkNames;
+                $scope.zooKeeperCluster = $scope.allZookeepers[0]
+            });
     };
 
 });
