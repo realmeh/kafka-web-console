@@ -61,6 +61,27 @@ object Util {
     } yield pidsAndBrokers.sortBy(pb => pb._1.toInt).map(pb => pb._2)
   }
 
+  // TODO: Writing this and calling it separately from getPartitionLeaders is inefficient, but still learning (AWS)
+  def getPartitionIsrs(topicName: String, zkClient: ZkClient): Future[Seq[String]] = {
+    Logger.debug("Getting partition isrs for topic " + topicName)
+    return for {
+      partitionStates <- getZChildren(zkClient, "/brokers/topics/" + topicName + "/partitions/*/state")
+        partitionsData <- Future.sequence(partitionStates.map(p =>
+          twitterToScalaFuture(p.getData().map(d =>
+            (p.path.split("/")(5),
+            new String(d.bytes))))))
+
+          json = partitionsData.map(d => (d._1, scala.util.parsing.json.JSON.parseFull(d._2)))
+
+          isrs = partitionsData.map(d => (d._1, ListOfStringToInts(scala.util.parsing.json.JSON.parseFull(d._2).get.asInstanceOf[Map[String, Any]].get("isr").get.asInstanceOf[List[Double]])))
+    } yield isrs.sortBy(isr => isr._1.toInt).map(isr => isr._2)
+  }
+
+  def ListOfStringToInts(theList: List[Double]) : String = {
+    val asInts = theList.map(theString => theString.asInstanceOf[Int])
+    asInts.mkString(",")
+  }
+
   def getPartitionsLogSize(topicName: String, partitionLeaders: Seq[String]): Future[Seq[Long]] = {
     Logger.debug("Getting partition log sizes for topic " + topicName + " from partition leaders " + partitionLeaders.mkString(", "))
 

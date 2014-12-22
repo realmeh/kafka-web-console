@@ -18,6 +18,7 @@
                     <th class="text-center">Partition</th>
                     <th class="text-center">Log Size</th>
                     <th class="text-center">Leader</th>
+                    <th class="text-center">ISRs</th>
                 </thead>
                 <tbody data-ng-repeat="topic in topics">
                 <tr>
@@ -30,6 +31,7 @@
                     <td class="clickable text-center" data-ng-click="getTopic(topic);">-</td>
                     <td class="clickable text-center" data-ng-click="getTopic(topic);">{{topic.logSize}}</td>
                     <td class="clickable text-center" data-ng-click="getTopic(topic);">-</td>
+                    <td class="clickable text-center" data-ng-click="getTopic(topic);">-</td>
                 </tr>
                 <tr data-ng-if="topic.expanded" class="row-animation" data-ng-repeat="partition in topic.partitions track by $index">
                     <td class="text-center"></td>
@@ -38,6 +40,7 @@
                     <td class="text-center">{{$index}}</td>
                     <td class="text-center">{{partition.logSize}}</td>
                     <td class="text-center">{{partition.leader}}</td>
+                    <td class="text-center">{{partition.isrs}}</td>
                 </tr>
                 </tbody>
             </table>

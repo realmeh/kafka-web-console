@@ -230,7 +230,8 @@ object Topic extends Controller {
       for {
         partitionLeaders <- getPartitionLeaders(e("name").toString, zkClient)
         partitionsLogSize <- getPartitionsLogSize(e("name").toString, partitionLeaders)
-        partitions = partitionsLogSize.zipWithIndex.map(pls => Map("id" -> pls._2.toString, "logSize" -> pls._1.toString, "leader" -> partitionLeaders(pls._2)))
+        partitionsIsrs <- getPartitionIsrs(e("name").toString, zkClient)
+        partitions = partitionsLogSize.zipWithIndex.map(pls => Map("id" -> pls._2.toString, "logSize" -> pls._1.toString, "leader" -> partitionLeaders(pls._2), "isrs" -> partitionsIsrs(pls._2)))
         logSizeSum = partitionsLogSize.foldLeft(0.0)(_ + _).toInt.toString
       } yield Map("name" -> e("name"), "partitions" -> partitions, "zookeeper" -> e("zookeeper"), "logSize" -> logSizeSum)
 
