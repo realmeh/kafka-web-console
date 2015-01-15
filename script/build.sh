@@ -1,4 +1,5 @@
-
+#!/bin/bash
+cd ..
 sbt dist
 
 mkdir build
